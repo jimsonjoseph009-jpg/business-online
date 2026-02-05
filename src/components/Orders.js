@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useLocalization } from '../contexts/LocalizationContext';
+import { formatCurrency } from '../utils/currencyManager';
 import { auth } from '../config/firebase';
 import { getIdToken } from 'firebase/auth';
 import SearchFilterBar from './SearchFilterBar';
@@ -9,6 +11,7 @@ import { exportToCSV, prepareDataForExport } from '../utils/exportUtils';
 import './Orders.css';
 
 const Orders = () => {
+  const { t, currency } = useLocalization();
   const [orders, setOrders] = useState([]);
   const [allOrders, setAllOrders] = useState([]);
   const [customers, setCustomers] = useState([]);

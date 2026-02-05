@@ -24,11 +24,40 @@
   height: 64px;
 }
 
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar-logo {
+  height: 80px;
+  width: 80px;
+  object-fit: contain;
+  animation: pulse 2s ease-in-out infinite;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.navbar-logo:hover {
+  transform: scale(1.1);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 0px #1e40af);
+  }
+  50% {
+    filter: drop-shadow(0 0 12px #0284c7);
+  }
+}
+
 .nav-logo {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
-  color: #E50914;
+  color: #1e40af;
   margin: 0;
+  letter-spacing: 0.5px;
 }
 
 .nav-right {

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useLocalization } from '../contexts/LocalizationContext';
 import './ImageUpload.css';
 
 const ImageUpload = ({ currentImage, onImageChange, folder, userId, maxSizeMB = 5 }) => {
+  const { t } = useLocalization();
   const [preview, setPreview] = useState(currentImage || null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');

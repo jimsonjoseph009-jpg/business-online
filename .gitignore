@@ -1,27 +1,42 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Dependencies
+node_modules/
+package-lock.json
+npm-debug.log*
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
-
-# testing
-/coverage
-
-# production
-/build
-
-# misc
-.DS_Store
+# Environment files
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.production
+server/.env
+server/.env.production
 
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Build files
+build/
+dist/
 
-# Firebase
-firebase-service-account.json
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Cache
+.cache/
+.eslintcache
+
+# Deployment
+.ebextensions/
+
+# Private keys
+*.pem
+*.key
+

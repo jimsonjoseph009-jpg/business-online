@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useLocalization } from '../contexts/LocalizationContext';
+import { formatCurrency } from '../utils/currencyManager';
 import { auth } from '../config/firebase';
 import { getIdToken } from 'firebase/auth';
 import { uploadImage } from '../utils/imageUpload';
@@ -11,6 +13,7 @@ import { exportToCSV, prepareDataForExport } from '../utils/exportUtils';
 import './Products.css';
 
 const Products = () => {
+  const { t, currency } = useLocalization();
   const [products, setProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -1,0 +1,422 @@
+.mobile-qr-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.qr-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 800px;
+  width: 100%;
+  padding: 40px;
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+/* Header */
+.qr-header {
+  text-align: center;
+  margin-bottom: 40px;
+  border-bottom: 3px solid #f0f0f0;
+  padding-bottom: 20px;
+}
+
+.qr-header h1 {
+  margin: 0;
+  font-size: 32px;
+  color: #333;
+  font-weight: 700;
+}
+
+.qr-header p {
+  margin: 10px 0 0 0;
+  color: #666;
+  font-size: 16px;
+}
+
+/* QR Section */
+.qr-section {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 30px;
+  background: #f9f9f9;
+  border-radius: 15px;
+}
+
+.qr-section h2 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 20px;
+}
+
+.qr-code-wrapper {
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.qr-code-image {
+  width: 350px;
+  height: 350px;
+  border: 3px solid #667eea;
+  border-radius: 10px;
+  padding: 10px;
+  background: white;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.qr-instructions {
+  margin: 15px 0 0 0;
+  color: #666;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Buttons */
+.btn-refresh,
+.btn-download {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 10px;
+  transition: all 0.3s ease;
+}
+
+.btn-refresh:hover,
+.btn-download:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Link Section */
+.link-section {
+  margin-bottom: 40px;
+  padding: 30px;
+  background: #f0f4ff;
+  border-radius: 15px;
+  border: 2px solid #e0e7ff;
+}
+
+.link-section h2 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 20px;
+}
+
+.link-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.link-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Courier New', monospace;
+  background: white;
+  transition: border-color 0.3s ease;
+}
+
+.link-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.btn-copy {
+  background: #48bb78;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-copy:hover {
+  background: #38a169;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+}
+
+.link-instructions {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Instructions */
+.instructions-section {
+  margin-bottom: 40px;
+  padding: 30px;
+  background: #fff9e6;
+  border-radius: 15px;
+  border: 2px solid #ffe699;
+}
+
+.instructions-section h2 {
+  margin: 0 0 25px 0;
+  color: #333;
+  font-size: 20px;
+}
+
+.instruction-step {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  align-items: flex-start;
+}
+
+.instruction-step:last-child {
+  margin-bottom: 0;
+}
+
+.step-number {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.step-content h3 {
+  margin: 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.step-content p {
+  margin: 8px 0 0 0;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Device Info */
+.device-info {
+  margin-bottom: 40px;
+  padding: 25px;
+  background: #e6f7ff;
+  border-radius: 15px;
+  border: 2px solid #91d5ff;
+}
+
+.device-info h3 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.info-item {
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 3px solid #1890ff;
+}
+
+.info-item label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  font-size: 12px;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.info-item span {
+  display: block;
+  color: #1890ff;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+.info-warning {
+  margin: 0;
+  padding: 10px;
+  background: #fff1f0;
+  border-left: 3px solid #ff7875;
+  color: #d9363e;
+  font-size: 13px;
+  border-radius: 4px;
+}
+
+/* Benefits Section */
+.benefits-section {
+  padding: 30px;
+  background: #f0fdf4;
+  border-radius: 15px;
+  border: 2px solid #bbf7d0;
+}
+
+.benefits-section h2 {
+  margin: 0 0 25px 0;
+  color: #333;
+  font-size: 20px;
+  text-align: center;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.benefit-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  border: 2px solid #bbf7d0;
+  transition: all 0.3s ease;
+}
+
+.benefit-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(34, 197, 94, 0.15);
+  border-color: #22c55e;
+}
+
+.benefit-card span {
+  font-size: 32px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.benefit-card h4 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.benefit-card p {
+  margin: 0;
+  color: #666;
+  font-size: 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .qr-card {
+    padding: 20px;
+  }
+
+  .qr-header h1 {
+    font-size: 24px;
+  }
+
+  .qr-code-image {
+    width: 280px;
+    height: 280px;
+  }
+
+  .instruction-step {
+    gap: 15px;
+  }
+
+  .step-number {
+    font-size: 24px;
+  }
+
+  .step-content h3 {
+    font-size: 14px;
+  }
+
+  .benefits-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .qr-card {
+    padding: 15px;
+    border-radius: 15px;
+  }
+
+  .qr-header h1 {
+    font-size: 20px;
+  }
+
+  .qr-header p {
+    font-size: 14px;
+  }
+
+  .qr-code-image {
+    width: 240px;
+    height: 240px;
+  }
+
+  .qr-section,
+  .link-section,
+  .instructions-section {
+    padding: 15px;
+  }
+
+  .link-container {
+    flex-direction: column;
+  }
+
+  .btn-copy {
+    width: 100%;
+  }
+
+  .benefits-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .step-content h3 {
+    font-size: 13px;
+  }
+
+  .step-content p {
+    font-size: 12px;
+  }
+}
+
+/* Scrollbar styling */
+.qr-card::-webkit-scrollbar {
+  width: 8px;
+}
+
+.qr-card::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 10px;
+}
+
+.qr-card::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 10px;
+}
+
+.qr-card::-webkit-scrollbar-thumb:hover {
+  background: #5568d3;
+}

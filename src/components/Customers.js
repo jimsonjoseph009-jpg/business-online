@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { auth } from '../config/firebase';
-import { getIdToken } from 'firebase/auth';
-import { uploadImage } from '../utils/imageUpload';
-import ImageUpload from './ImageUpload';
-import SearchFilterBar from './SearchFilterBar';
-import Pagination from './Pagination';
-import { applyFilters, sortItems } from '../utils/searchUtils';
-import { getPaginatedItems } from '../utils/paginationUtils';
-import { exportToCSV, prepareDataForExport } from '../utils/exportUtils';
+import { useLocalization } from '../contexts/LocalizationContext';
+import { customersService } from '../services/firestoreService';
+import { storageService } from '../services/storageService';
 import './Customers.css';
 
 const Customers = () => {
@@ -26,123 +20,81 @@ const Customers = () => {
   const [selectedImageFile, setSelectedImageFile] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState({});
-  const [sortField, setSortField] = useState('name');
-  const [sortDirection, setSortDirection] = useState('asc');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10);
 
   useEffect(() => {
     fetchCustomers();
   }, []);
 
   useEffect(() => {
-    applyAllFilters();
-  }, [searchTerm, filters, sortField, sortDirection, allCustomers, currentPage]);
+    // Simple filter for search
+    if (searchTerm) {
+      const filtered = allCustomers.filter(customer =>
+        customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (customer.phone && customer.phone.includes(searchTerm))
+      );
+      setCustomers(filtered);
+    } else {
+      setCustomers(allCustomers);
+    }
+  }, [searchTerm, allCustomers]);
 
   const fetchCustomers = async () => {
     try {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const token = await getIdToken(user);
-      const response = await fetch('/api/customers', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      const data = await response.json();
+      setLoading(true);
+      const data = await customersService.getAllCustomers();
       setAllCustomers(data);
     } catch (error) {
       console.error('Error fetching customers:', error);
+      alert('Failed to load customers');
     } finally {
       setLoading(false);
     }
   };
 
-  const applyAllFilters = () => {
-    let filtered = allCustomers;
-
-    // Apply search
-    if (searchTerm) {
-      filtered = filtered.filter(customer =>
-        customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (customer.phone && customer.phone.includes(searchTerm))
-      );
-    }
-
-    // Apply sort
-    if (sortField) {
-      filtered = sortItems(filtered, sortField, sortDirection);
-    }
-
-    // Apply pagination
-    const paginated = getPaginatedItems(filtered, currentPage, pageSize);
-    setCustomers(paginated.items);
-    
-    // Store pagination info
-    window.paginationInfo = {
-      totalItems: paginated.totalItems,
-      totalPages: paginated.totalPages,
-      currentPage: paginated.currentPage,
-      pageSize: paginated.pageSize,
-      hasNextPage: paginated.hasNextPage,
-      hasPrevPage: paginated.hasPrevPage,
-    };
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const user = auth.currentUser;
-      if (!user) return;
+    if (!formData.name || !formData.email) {
+      alert('Please fill in required fields');
+      return;
+    }
 
+    try {
       setUploadingImage(true);
       let imageUrl = formData.imageUrl;
 
       // Upload image if a new file is selected
       if (selectedImageFile) {
         try {
-          imageUrl = await uploadImage(selectedImageFile, 'customers', user.uid);
+          imageUrl = await storageService.uploadCustomerAvatar(
+            selectedImageFile,
+            editingCustomer?.id || Date.now().toString()
+          );
         } catch (error) {
           console.error('Error uploading image:', error);
-          alert('Failed to upload image. Please try again.');
-          setUploadingImage(false);
-          return;
+          // Continue without image
         }
       }
 
-      const token = await getIdToken(user);
-      const url = editingCustomer 
-        ? `/api/customers/${editingCustomer.id}`
-        : '/api/customers';
-      
-      const method = editingCustomer ? 'PUT' : 'POST';
-
       const customerData = {
-        ...formData,
-        imageUrl
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        imageUrl: imageUrl || ''
       };
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(customerData)
-      });
-
-      if (response.ok) {
-        setShowModal(false);
-        setEditingCustomer(null);
-        setFormData({ name: '', email: '', phone: '', address: '', imageUrl: '' });
-        setSelectedImageFile(null);
-        fetchCustomers();
+      if (editingCustomer) {
+        await customersService.updateCustomer(editingCustomer.id, customerData);
+      } else {
+        await customersService.addCustomer(customerData);
       }
+
+      setShowModal(false);
+      setEditingCustomer(null);
+      setFormData({ name: '', email: '', phone: '', address: '', imageUrl: '' });
+      setSelectedImageFile(null);
+      await fetchCustomers();
     } catch (error) {
       console.error('Error saving customer:', error);
       alert('Failed to save customer. Please try again.');
@@ -172,34 +124,11 @@ const Customers = () => {
     if (!window.confirm('Are you sure you want to delete this customer?')) return;
 
     try {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const token = await getIdToken(user);
-      const response = await fetch(`/api/customers/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        fetchCustomers();
-        setCurrentPage(1);
-      }
+      await customersService.deleteCustomer(id);
+      await fetchCustomers();
     } catch (error) {
       console.error('Error deleting customer:', error);
-    }
-  };
-
-  const handleExport = () => {
-    try {
-      const exportData = prepareDataForExport(allCustomers, ['name', 'email', 'phone', 'address']);
-      exportToCSV(exportData, ['name', 'email', 'phone', 'address'], 'customers.csv');
-    } catch (error) {
-      console.error('Error exporting customers:', error);
-      alert('Failed to export customers');
+      alert('Failed to delete customer');
     }
   };
 
@@ -207,17 +136,11 @@ const Customers = () => {
     return <div className="loading">Loading customers...</div>;
   }
 
-  const paginationInfo = window.paginationInfo || { 
-    totalItems: allCustomers.length, 
-    totalPages: 1, 
-    currentPage: 1, 
-    pageSize: 10 
-  };
-
   return (
     <div className="customers">
       <div className="page-header">
-        <h1>Customers</h1>
+        <h1>👥 Customers</h1>
+        <p>Manage and track your customers</p>
         <button 
           className="add-button"
           onClick={() => {
@@ -227,64 +150,47 @@ const Customers = () => {
             setShowModal(true);
           }}
         >
-          + Add Customer
+          ➕ Add Customer
         </button>
       </div>
 
-      <SearchFilterBar
-        onSearch={setSearchTerm}
-        onFilter={setFilters}
-        onSort={(field, direction) => {
-          setSortField(field);
-          setSortDirection(direction);
-          setCurrentPage(1);
-        }}
-        showDateRange={false}
-        showPriceRange={false}
-        onExport={handleExport}
-      />
+      <div className="search-box">
+        <input
+          type="text"
+          placeholder="Search customers by name or email..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
 
       {customers.length === 0 ? (
         <div className="empty-state">
-          <p>No customers found. {allCustomers.length === 0 ? 'Add your first customer to get started!' : 'Try adjusting your filters.'}</p>
+          <p>No customers found. {allCustomers.length === 0 ? 'Add your first customer to get started!' : 'Try adjusting your search.'}</p>
         </div>
       ) : (
-        <>
-          <div className="customers-grid">
-            {customers.map((customer) => (
-              <div key={customer.id} className="customer-card">
-                {customer.imageUrl && (
-                  <div className="customer-image-wrapper">
-                    <img src={customer.imageUrl} alt={customer.name} className="customer-image" />
-                  </div>
-                )}
-                <div className="customer-info">
-                  <h3>{customer.name}</h3>
-                  <p><strong>Email:</strong> {customer.email}</p>
-                  <p><strong>Phone:</strong> {customer.phone || 'N/A'}</p>
-                  <p><strong>Address:</strong> {customer.address || 'N/A'}</p>
-                </div>
-                <div className="card-actions">
-                  <button onClick={() => handleEdit(customer)} className="edit-button">
-                    Edit
-                  </button>
-                  <button onClick={() => handleDelete(customer.id)} className="delete-button">
-                    Delete
-                  </button>
-                </div>
+        <div className="customers-grid">
+          {customers.map((customer) => (
+            <div key={customer.id} className="customer-card">
+              {customer.imageUrl && (
+                <img src={customer.imageUrl} alt={customer.name} className="customer-image" />
+              )}
+              <div className="customer-info">
+                <h3>{customer.name}</h3>
+                <p><strong>Email:</strong> {customer.email}</p>
+                <p><strong>Phone:</strong> {customer.phone || 'N/A'}</p>
+                <p><strong>Address:</strong> {customer.address || 'N/A'}</p>
               </div>
-            ))}
-          </div>
-          {paginationInfo.totalPages > 1 && (
-            <Pagination
-              currentPage={paginationInfo.currentPage}
-              totalPages={paginationInfo.totalPages}
-              totalItems={paginationInfo.totalItems}
-              pageSize={paginationInfo.pageSize}
-              onPageChange={setCurrentPage}
-            />
-          )}
-        </>
+              <div className="card-actions">
+                <button onClick={() => handleEdit(customer)} className="edit-button">
+                  ✏️ Edit
+                </button>
+                <button onClick={() => handleDelete(customer.id)} className="delete-button">
+                  🗑️ Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
 
       {showModal && (
@@ -293,20 +199,12 @@ const Customers = () => {
             <h2>{editingCustomer ? 'Edit Customer' : 'Add Customer'}</h2>
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label>Profile Picture</label>
-                <ImageUpload
-                  currentImage={formData.imageUrl}
-                  onImageChange={handleImageChange}
-                  folder="customers"
-                  userId={auth.currentUser?.uid}
-                />
-              </div>
-              <div className="form-group">
                 <label>Name *</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Enter customer name"
                   required
                 />
               </div>
@@ -316,6 +214,7 @@ const Customers = () => {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  placeholder="Enter email address"
                   required
                 />
               </div>
@@ -325,6 +224,7 @@ const Customers = () => {
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="Enter phone number"
                 />
               </div>
               <div className="form-group">
@@ -332,15 +232,27 @@ const Customers = () => {
                 <textarea
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="Enter address"
                   rows="3"
                 />
+              </div>
+              <div className="form-group">
+                <label>Profile Picture</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+                {formData.imageUrl && (
+                  <img src={formData.imageUrl} alt="Preview" className="image-preview" style={{ maxWidth: '100px', marginTop: '10px' }} />
+                )}
               </div>
               <div className="modal-actions">
                 <button type="button" onClick={() => setShowModal(false)} className="cancel-button">
                   Cancel
                 </button>
                 <button type="submit" className="save-button" disabled={uploadingImage}>
-                  {uploadingImage ? 'Saving...' : 'Save'}
+                  {uploadingImage ? 'Saving...' : editingCustomer ? 'Update' : 'Add'} Customer
                 </button>
               </div>
             </form>

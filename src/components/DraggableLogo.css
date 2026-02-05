@@ -1,0 +1,84 @@
+.draggable-logo {
+  position: fixed;
+  cursor: grab;
+  z-index: 999;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  border: 2px solid #e5e7eb;
+  transition: all 0.3s ease;
+  user-select: none;
+  min-width: 280px;
+}
+
+.draggable-logo:hover {
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+  border-color: #1e40af;
+  transform: scale(1.05);
+}
+
+.draggable-logo.dragging {
+  cursor: grabbing;
+  opacity: 0.95;
+  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.4);
+}
+
+.logo-svg {
+  width: 200px;
+  height: 200px;
+  display: block;
+  margin: 0 auto;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+.logo-label {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e40af;
+  letter-spacing: 1px;
+}
+
+.drag-hint {
+  text-align: center;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .draggable-logo {
+    min-width: 240px;
+    padding: 16px;
+  }
+
+  .logo-svg {
+    width: 160px;
+    height: 160px;
+  }
+
+  .logo-label {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .draggable-logo {
+    min-width: 200px;
+    padding: 12px;
+  }
+
+  .logo-svg {
+    width: 140px;
+    height: 140px;
+  }
+
+  .logo-label {
+    font-size: 14px;
+  }
+}

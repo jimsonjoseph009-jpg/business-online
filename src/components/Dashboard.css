@@ -36,11 +36,11 @@
 .stat-card {
   background: #1a1a1a;
   border-radius: 12px;
-  padding: 24px;
+  padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   border: 1px solid #333;
 }
@@ -52,42 +52,45 @@
 }
 
 .stat-icon {
-  font-size: 48px;
+  font-size: 36px;
+  flex-shrink: 0;
 }
 
 .stat-content {
   flex: 1;
+  min-width: 0;
 }
 
 .stat-title {
-  font-size: 14px;
+  font-size: 11px;
   color: #b3b3b3;
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .stat-value {
-  font-size: 32px;
+  font-size: 20px;
   font-weight: 700;
   color: #E50914;
   margin: 0;
+  word-break: break-word;
 }
 
 .quick-actions {
   background: #1a1a1a;
   border-radius: 12px;
-  padding: 32px;
+  padding: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   border: 1px solid #333;
 }
 
 .quick-actions h2 {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   color: #ffffff;
-  margin: 0 0 24px 0;
+  margin: 0 0 20px 0;
 }
 
 .action-buttons {
@@ -100,15 +103,18 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 24px;
+  gap: 10px;
+  padding: 16px;
   background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
   border: 2px solid #e2e8f0;
   border-radius: 12px;
   text-decoration: none;
   color: #2d3748;
   font-weight: 600;
+  font-size: 13px;
   transition: all 0.2s;
+  min-height: 100px;
+  justify-content: center;
 }
 
 .action-button:hover {
@@ -120,7 +126,7 @@
 }
 
 .action-icon {
-  font-size: 32px;
+  font-size: 28px;
 }
 
 .loading {

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useLocalization } from '../contexts/LocalizationContext';
+import { formatCurrency } from '../utils/currencyManager';
 import { auth } from '../config/firebase';
 import { getAuth, getIdToken } from 'firebase/auth';
 import './Dashboard.css';
 
 const Dashboard = () => {
+  const { t, currency } = useLocalization();
   const [stats, setStats] = useState({
     customers: 0,
     products: 0,
@@ -54,20 +57,20 @@ const Dashboard = () => {
   };
 
   const statCards = [
-    { title: 'Total Customers', value: stats.customers, icon: '👥', color: '#667eea' },
-    { title: 'Products', value: stats.products, icon: '📦', color: '#f56565' },
-    { title: 'Orders', value: stats.orders, icon: '🛒', color: '#48bb78' },
-    { title: 'Revenue', value: `$${stats.revenue.toLocaleString()}`, icon: '💰', color: '#ed8936' }
+    { title: t('dashboard', 'totalCustomers') || 'Total Customers', value: stats.customers, icon: '👥', color: '#667eea' },
+    { title: t('dashboard', 'totalProducts') || 'Products', value: stats.products, icon: '📦', color: '#f56565' },
+    { title: t('dashboard', 'totalOrders') || 'Orders', value: stats.orders, icon: '🛒', color: '#48bb78' },
+    { title: t('dashboard', 'totalSales'), value: formatCurrency(stats.revenue, currency), icon: '💰', color: '#ed8936' }
   ];
 
   if (loading) {
-    return <div className="loading">Loading dashboard...</div>;
+    return <div className="loading">{t('common', 'loading')}</div>;
   }
 
   return (
     <div className="dashboard">
-      <h1 className="dashboard-title">Dashboard</h1>
-      <p className="dashboard-subtitle">Welcome to your business management center</p>
+      <h1 className="dashboard-title">{t('dashboard', 'title')}</h1>
+      <p className="dashboard-subtitle">{t('dashboard', 'welcome')} {t('common', 'settings')}</p>
       
       <div className="stats-grid">
         {statCards.map((stat, index) => (
@@ -82,19 +85,19 @@ const Dashboard = () => {
       </div>
 
       <div className="quick-actions">
-        <h2>Quick Actions</h2>
+        <h2>{t('common', 'help') || 'Quick Actions'}</h2>
         <div className="action-buttons">
           <Link to="/customers" className="action-button">
             <span className="action-icon">👥</span>
-            <span>Manage Customers</span>
+            <span>{t('dashboard', 'manageCustomers') || 'Manage Customers'}</span>
           </Link>
           <Link to="/products" className="action-button">
             <span className="action-icon">📦</span>
-            <span>Manage Products</span>
+            <span>{t('dashboard', 'manageProducts') || 'Manage Products'}</span>
           </Link>
           <Link to="/orders" className="action-button">
             <span className="action-icon">🛒</span>
-            <span>View Orders</span>
+            <span>{t('dashboard', 'viewOrders') || 'View Orders'}</span>
           </Link>
         </div>
       </div>

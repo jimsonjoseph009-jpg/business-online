@@ -1,156 +1,149 @@
-const { db, admin } = require('../config/firebase');
+const pool = require('../db/mysql');
 
+/**
+ * Product service backed by MySQL
+ * Matches the products table structure we defined.
+ */
 const productService = {
   // Get all products for user
   getAll: async (userId) => {
-    try {
-      const snapshot = await db.collection('products')
-        .where('userId', '==', userId)
-        .orderBy('createdAt', 'desc')
-        .get();
-      
-      return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-    } catch (error) {
-      throw {
-        status: 500,
-        message: 'Failed to fetch products',
-        code: 'FETCH_ERROR',
-        details: error.message
-      };
-    }
+    const [rows] = await pool.query(
+      'SELECT * FROM products WHERE user_id = ? ORDER BY created_at DESC',
+      [userId]
+    );
+    return rows;
   },
 
   // Get single product
   getById: async (productId, userId) => {
-    try {
-      const doc = await db.collection('products').doc(productId).get();
-      
-      if (!doc.exists) {
-        throw {
-          status: 404,
-          message: 'Product not found',
-          code: 'NOT_FOUND'
-        };
-      }
+    const [rows] = await pool.query(
+      'SELECT * FROM products WHERE id = ? AND user_id = ?',
+      [productId, userId]
+    );
 
-      const data = doc.data();
-      if (data.userId !== userId) {
-        throw {
-          status: 403,
-          message: 'Access denied',
-          code: 'ACCESS_DENIED'
-        };
-      }
-
-      return { id: doc.id, ...data };
-    } catch (error) {
-      if (error.status) throw error;
+    if (!rows.length) {
       throw {
-        status: 500,
-        message: 'Failed to fetch product',
-        code: 'FETCH_ERROR',
-        details: error.message
+        status: 404,
+        message: 'Product not found',
+        code: 'NOT_FOUND'
       };
     }
+
+    return rows[0];
   },
 
   // Create product
   create: async (productData, userId) => {
-    try {
-      const docRef = await db.collection('products').add({
-        ...productData,
-        userId,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp()
-      });
+    const {
+      name,
+      sku,
+      description,
+      price,
+      cost,
+      stock,
+      stock_threshold,
+      category,
+      imageUrl,
+      is_active
+    } = productData;
 
-      const doc = await docRef.get();
-      return { id: doc.id, ...doc.data() };
-    } catch (error) {
-      throw {
-        status: 500,
-        message: 'Failed to create product',
-        code: 'CREATE_ERROR',
-        details: error.message
-      };
-    }
+    const [result] = await pool.query(
+      `INSERT INTO products 
+       (user_id, name, sku, description, price, cost, stock, stock_threshold, category, image_url, is_active)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        userId,
+        name,
+        sku || null,
+        description || null,
+        price != null ? price : 0,
+        cost != null ? cost : null,
+        stock != null ? stock : 0,
+        stock_threshold != null ? stock_threshold : 0,
+        category || null,
+        imageUrl || null,
+        is_active != null ? is_active : 1
+      ]
+    );
+
+    const [rows] = await pool.query(
+      'SELECT * FROM products WHERE id = ?',
+      [result.insertId]
+    );
+    return rows[0];
   },
 
   // Update product
   update: async (productId, productData, userId) => {
-    try {
-      const doc = await db.collection('products').doc(productId).get();
-      
-      if (!doc.exists) {
-        throw {
-          status: 404,
-          message: 'Product not found',
-          code: 'NOT_FOUND'
-        };
-      }
+    const existing = await productService.getById(productId, userId); // throws 404 if not found
 
-      if (doc.data().userId !== userId) {
-        throw {
-          status: 403,
-          message: 'Access denied',
-          code: 'ACCESS_DENIED'
-        };
-      }
+    const {
+      name = existing.name,
+      sku = existing.sku,
+      description = existing.description,
+      price = existing.price,
+      cost = existing.cost,
+      stock = existing.stock,
+      stock_threshold = existing.stock_threshold,
+      category = existing.category,
+      imageUrl = existing.image_url,
+      is_active = existing.is_active
+    } = productData;
 
-      await db.collection('products').doc(productId).update({
-        ...productData,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp()
-      });
+    const [result] = await pool.query(
+      `UPDATE products
+       SET name = ?, sku = ?, description = ?, price = ?, cost = ?, stock = ?, 
+           stock_threshold = ?, category = ?, image_url = ?, is_active = ?
+       WHERE id = ? AND user_id = ?`,
+      [
+        name,
+        sku || null,
+        description || null,
+        price,
+        cost,
+        stock,
+        stock_threshold,
+        category || null,
+        imageUrl || null,
+        is_active,
+        productId,
+        userId
+      ]
+    );
 
-      const updated = await db.collection('products').doc(productId).get();
-      return { id: updated.id, ...updated.data() };
-    } catch (error) {
-      if (error.status) throw error;
+    if (!result.affectedRows) {
       throw {
-        status: 500,
-        message: 'Failed to update product',
-        code: 'UPDATE_ERROR',
-        details: error.message
+        status: 404,
+        message: 'Product not found',
+        code: 'NOT_FOUND'
       };
     }
+
+    const [rows] = await pool.query(
+      'SELECT * FROM products WHERE id = ?',
+      [productId]
+    );
+    return rows[0];
   },
 
   // Delete product
   delete: async (productId, userId) => {
-    try {
-      const doc = await db.collection('products').doc(productId).get();
-      
-      if (!doc.exists) {
-        throw {
-          status: 404,
-          message: 'Product not found',
-          code: 'NOT_FOUND'
-        };
-      }
+    const [result] = await pool.query(
+      'DELETE FROM products WHERE id = ? AND user_id = ?',
+      [productId, userId]
+    );
 
-      if (doc.data().userId !== userId) {
-        throw {
-          status: 403,
-          message: 'Access denied',
-          code: 'ACCESS_DENIED'
-        };
-      }
-
-      await db.collection('products').doc(productId).delete();
-      return { success: true };
-    } catch (error) {
-      if (error.status) throw error;
+    if (!result.affectedRows) {
       throw {
-        status: 500,
-        message: 'Failed to delete product',
-        code: 'DELETE_ERROR',
-        details: error.message
+        status: 404,
+        message: 'Product not found',
+        code: 'NOT_FOUND'
       };
     }
+
+    return { success: true };
   }
 };
 
 module.exports = productService;
+

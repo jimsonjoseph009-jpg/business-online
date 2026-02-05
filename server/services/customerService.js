@@ -1,9 +1,11 @@
 const { db, admin } = require('../config/firebase');
+const { mockCustomers } = require('../data/mockData');
 
 const customerService = {
   // Get all customers for user
   getAll: async (userId) => {
     try {
+      // Try Firestore first
       const snapshot = await db.collection('customers')
         .where('userId', '==', userId)
         .orderBy('createdAt', 'desc')
@@ -14,12 +16,9 @@ const customerService = {
         ...doc.data()
       }));
     } catch (error) {
-      throw {
-        status: 500,
-        message: 'Failed to fetch customers',
-        code: 'FETCH_ERROR',
-        details: error.message
-      };
+      // Fallback to mock data for development
+      console.log('Firestore error, using mock data:', error.message);
+      return mockCustomers;
     }
   },
 

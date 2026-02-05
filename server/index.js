@@ -11,6 +11,10 @@ const healthRoutes = require('./routes/health');
 const customerRoutes = require('./routes/customers');
 const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
+const messagesRoutes = require('./routes/messages');
+const notificationsRoutes = require('./routes/notifications');
+const searchesRoutes = require('./routes/searches');
+const demoRoutes = require('./routes/demo');
 
 const app = express();
 
@@ -28,6 +32,12 @@ app.use(`${config.API_PREFIX}/health`, healthRoutes);
 app.use(`${config.API_PREFIX}/customers`, customerRoutes);
 app.use(`${config.API_PREFIX}/products`, productRoutes);
 app.use(`${config.API_PREFIX}/orders`, orderRoutes);
+app.use(`${config.API_PREFIX}/messages`, messagesRoutes);
+app.use(`${config.API_PREFIX}/conversations`, messagesRoutes);
+app.use(`${config.API_PREFIX}/notifications`, notificationsRoutes);
+app.use(`${config.API_PREFIX}/reviews`, searchesRoutes);
+app.use(`${config.API_PREFIX}/searches`, searchesRoutes);
+app.use(`${config.API_PREFIX}/demo`, demoRoutes);
 
 // 404 handler
 app.use((req, res) => {

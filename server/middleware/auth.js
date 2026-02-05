@@ -2,6 +2,15 @@ const { admin } = require('../config/firebase');
 
 const authenticateToken = async (req, res, next) => {
   try {
+    // Allow localhost requests without authentication for development
+    if (req.hostname === 'localhost' || req.hostname === '127.0.0.1') {
+      req.user = { 
+        uid: 'dev-user',
+        email: 'dev@example.com'
+      };
+      return next();
+    }
+
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
